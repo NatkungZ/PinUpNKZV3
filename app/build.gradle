@@ -17,6 +17,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    repositories {
+        mavenCentral()
+    }
 }
 
 dependencies {
@@ -30,4 +33,5 @@ dependencies {
     compile 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
     compile 'com.prolificinteractive:material-calendarview:1.1.0'
     compile 'com.android.support:percent:23.0.0'
+    compile 'com.facebook.android:facebook-android-sdk:4.7.0'
 }

@@ -3,6 +3,7 @@ package com.example.undine.project_ooad;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -26,8 +27,27 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.facebook.appevents.AppEventsLogger;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -44,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
             R.drawable.ic_schedule_black,
             R.drawable.ic_account_black
     };
+
+    public static final String URL = "http://203.151.92.175:8080/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +85,31 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(mViewPager);
         setupTabIcons();
 
+        String userFBID,sendID,datelog,topicID,time;
+        datelog = "20151117";
+        topicID = "";
+        time = "";
+
+        if (savedInstanceState == null) {
+            Bundle extras = getIntent().getExtras();
+            if(extras == null) {
+                userFBID= null;
+            } else {
+                userFBID = extras.getString("USER_FB_ID");
+            }
+        } else {
+            userFBID = (String)savedInstanceState.getSerializable("USER_FB_ID");
+        }
+
+        sendID = ("?accountID="+userFBID+"&date="+datelog+"&topicID="+topicID+"&time="+time);
+        if (userFBID != null) {
+            Bundle bundle = new Bundle();
+            bundle.putString("fbid", userFBID);
+            ManageAccount manageAccount = new ManageAccount();
+            manageAccount.setArguments(bundle);
+            new SimpleTask().execute(URL + "storePinup" + userFBID);
+            Toast.makeText(getApplicationContext(), URL + "storePinup" + sendID, Toast.LENGTH_LONG).show();
+        }
     }
 
     private void setupTabIcons() {
@@ -126,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+
         //noinspection SimplifiableIfStatement
         if (id == R.id.search_action) {
             startActivity(new Intent(this,Search.class));
@@ -139,10 +187,73 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
+
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
 
+        // Logs 'install' and 'app activate' App Events.
+        AppEventsLogger.activateApp(this);
 
+        if (AccessToken.getCurrentAccessToken()==null) {
+            startActivity(new Intent(this, LoginActivity.class));
+        }
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Logs 'app deactivate' App Event.
+        AppEventsLogger.deactivateApp(this);
+    }
+
+    private class SimpleTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            // Create Show ProgressBar
+        }
+
+        protected String doInBackground(String... urls) {
+            String result = "";
+            IOException ee;
+            Exception ex;
+            try {
+
+                HttpPost httpPost = new HttpPost(urls[0]);
+                HttpClient client = new DefaultHttpClient();
+
+                HttpResponse response = client.execute(httpPost);
+
+                int statusCode = response.getStatusLine().getStatusCode();
+
+                if (statusCode == 200) {
+                    InputStream inputStream = response.getEntity().getContent();
+                    BufferedReader reader = new BufferedReader
+                            (new InputStreamReader(inputStream));
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        result += line;
+                    }
+                }
+
+            } catch (ClientProtocolException e) {
+
+            } catch (IOException e) {
+                ee=e;
+            }catch (Exception e){
+                ex=e;
+            }
+            return result;
+        }
+
+        protected void onPostExecute(String jsonString) {
+            // Dismiss ProgressBar
+            Toast.makeText(getApplicationContext(),"Post Data",Toast.LENGTH_SHORT).show();
+        }
+    }
 
 }
