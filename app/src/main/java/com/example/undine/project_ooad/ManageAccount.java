@@ -3,8 +3,10 @@ package com.example.undine.project_ooad;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -37,6 +39,9 @@ public class ManageAccount extends Fragment {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              final Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        final String fbid = sharedPreferences.getString("userid","USERID");
+
         final View view = inflater.inflate(R.layout.fragment_manage_account, container, false);
 
 
@@ -51,13 +56,17 @@ public class ManageAccount extends Fragment {
                         .setMessage("Are you sure you want to delete this entry?")
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putString("userid","");
+                                editor.apply();
+
                                 LoginManager.getInstance().logOut();
                                 startActivity(new Intent(view.getContext(), LoginActivity.class));
                             }
                         })
                         .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                // do nothing
+                                Toast.makeText(getContext(),fbid,Toast.LENGTH_SHORT).show();
                             }
                         })
                         .setIcon(android.R.drawable.ic_dialog_alert)

@@ -1,12 +1,14 @@
 package com.example.undine.project_ooad;
 
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.google.gson.Gson;
@@ -155,6 +157,22 @@ public class NewFeed extends Fragment {
         }*/
         mAdapter = new CustomAdapter(getActivity(), events);
         mListView.setAdapter(mAdapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Object listItem = mListView.getItemAtPosition(position);
+                System.out.println(listItem);
+                Intent intent = new Intent(getContext(), DetailActivity.class);
+                Event en = (Event) listItem;
+                intent.putExtra("EVENT_TITLE", en.getNameTitle());
+                intent.putExtra("EVENT_DATE", en.getStartDate());
+                intent.putExtra("EVENT_LOCATE", en.getLocation());
+                intent.putExtra("EVENT_DES", en.getDescription());
+                intent.putExtra("EVENT_RATE", en.getRate());
+                System.out.println(en.getDescription());
+                startActivity(intent);
+            }
+        });
     }
 
 }

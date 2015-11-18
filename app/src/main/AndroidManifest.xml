@@ -65,6 +65,8 @@
             android:excludeFromRecents="true"
             >
         </activity>
+        <activity android:name=".DetailActivity" >
+            </activity>
     </application>
 
 </manifest>

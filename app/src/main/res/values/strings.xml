@@ -20,6 +20,12 @@
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
+    <string name="textTitle">Title</string>
+    <string name="textDate">Date</string>
+    <string name="textLocation">Location</string>
+    <string name="textDescription">Description</string>
+    <string name="textContact">083-654-4921</string>
+    <string name="textRate">5.0</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>

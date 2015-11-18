@@ -1,6 +1,8 @@
 package com.example.undine.project_ooad;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,6 +33,12 @@ public class FacebookFragment extends Fragment {
             AccessToken accesstoken = loginResult.getAccessToken();
             Profile profile = Profile.getCurrentProfile();
             System.out.println("AppID is : " + accesstoken.getUserId());
+
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("userid",accesstoken.getUserId());
+            editor.commit();
+
             Intent intent = new Intent(getContext(), MainActivity.class);
             intent.putExtra("USER_FB_ID",accesstoken.getUserId());
             startActivity(intent);
