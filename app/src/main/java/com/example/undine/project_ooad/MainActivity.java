@@ -2,8 +2,10 @@ package com.example.undine.project_ooad;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -30,6 +32,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
+import com.facebook.Profile;
 import com.facebook.appevents.AppEventsLogger;
 
 import org.apache.http.HttpResponse;
@@ -41,11 +47,14 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -57,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager mViewPager;
     private TabLayout tabLayout;
     private Context context;
+    private String name = "";
 
     private int[] imageResId = {
             R.drawable.ic_home_black,
@@ -103,12 +113,32 @@ public class MainActivity extends AppCompatActivity {
 
         sendID = ("?accountID="+userFBID+"&date="+datelog+"&topicID="+topicID+"&time="+time);
         if (userFBID != null) {
-            Bundle bundle = new Bundle();
-            bundle.putString("fbid", userFBID);
-            ManageAccount manageAccount = new ManageAccount();
-            manageAccount.setArguments(bundle);
             new SimpleTask().execute(URL + "storePinup" + userFBID);
-            Toast.makeText(getApplicationContext(), URL + "storePinup" + sendID, Toast.LENGTH_LONG).show();
+            final AccessToken accessToken = AccessToken.getCurrentAccessToken();
+            GraphRequest request = GraphRequest.newMeRequest(
+                    accessToken,
+                    new GraphRequest.GraphJSONObjectCallback() {
+                        @Override
+                        public void onCompleted(
+                                JSONObject object,
+                                GraphResponse response) {
+                            // Application code
+                            System.out.println("onComplete");
+                            name = object.optString("first_name").toString() + " " + object.optString("last_name").toString();
+                            Toast.makeText(getApplicationContext(), name, Toast.LENGTH_LONG).show();
+                            System.out.println(name);
+                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("uname", name);
+                            editor.commit();
+                        }
+                    });
+            Bundle parameters = new Bundle();
+            parameters.putString("fields","id,gender,birthday,first_name,last_name,age_range");
+            request.setParameters(parameters);
+            request.executeAsync();
+
+
         }
     }
 
